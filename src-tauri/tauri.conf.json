@@ -1,0 +1,38 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "top",
+  "version": "0.1.0",
+  "identifier": "com.muhammad.top",
+  "build": {
+    "devUrl": "https://alsoltan.devozilla.com"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Track One Plus",
+        "decorations": false,
+        "width": 1200,
+        "height": 600,
+        "minWidth": 1036,
+        "minHeight": 500,
+        "maximized": true,
+        "backgroundColor": "#020618",
+        "devtools": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}
