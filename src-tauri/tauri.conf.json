@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "identifier": "com.muhammad.top",
   "build": {
-    "devUrl": "https://alsoltan.devozilla.com"
+    "devUrl": "http://172.25.193.64:5173/"
   },
   "app": {
     "windows": [
