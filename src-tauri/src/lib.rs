@@ -44,8 +44,8 @@ pub fn run() {
                             tauri::WebviewUrl::App("/api-settings".into()),
                         )
                         .title("API Configuration")
-                        .inner_size(400.0, 300.0)
-                        .resizable(false)
+                        .inner_size(500.0, 300.0)
+                        .resizable(true)
                         .always_on_top(true)
                         .build();
                     }
