@@ -1,12 +1,14 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "top",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "identifier": "com.muhammad.top",
   "build": {
-    "devUrl": "http://172.25.193.64:5173/"
+    "devUrl": "http://localhost:5173/",
+    "frontendDist": "../../newtopfront/dist"
   },
   "app": {
+    "withGlobalTauri": true,
     "windows": [
       {
         "title": "Track One Plus",
@@ -34,5 +36,14 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://github.com/devozilla/tauri/releases/latest/download/latest.json"
+      ],
+      "pubkey": "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"
+    }
   }
 }

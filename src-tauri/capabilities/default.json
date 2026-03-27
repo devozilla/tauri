@@ -5,10 +5,13 @@
   "windows": ["main"],
   "permissions": [
     "core:default",
-    "opener:default",
+    "core:webview:default",
+    "core:webview:allow-create-webview-window",
+    "core:window:default",
     "core:window:allow-minimize",
     "core:window:allow-toggle-maximize",
     "core:window:allow-close",
+    "dialog:default",
     "printer:default",
     "fs:default",
     "fs:allow-temp-write",
@@ -17,6 +20,11 @@
     "fs:allow-temp-read-recursive",
     "fs:allow-exists",
     "fs:allow-remove",
-    "fs:allow-write-file"
+    "fs:allow-write-file",
+    "updater:default",
+    "store:default",
+    "process:default",
+    "core:tray:default",
+    "core:menu:default"
   ]
 }
