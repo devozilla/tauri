@@ -3,6 +3,9 @@
   "identifier": "default",
   "description": "Capability for the main window",
   "windows": ["main"],
+  "remote": {
+    "urls": ["https://newtopfront.netlify.app", "https://newtopfront.netlify.app/*"]
+  },
   "permissions": [
     "core:default",
     "core:webview:default",
