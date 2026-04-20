@@ -17,9 +17,7 @@
         "height": 600,
         "minWidth": 1036,
         "minHeight": 500,
-        "maximized": true,
-        "backgroundColor": "#020618",
-        "devtools": false
+        "maximized": true
       }
     ],
     "security": {
@@ -35,15 +33,8 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "resources": ["resources/SumatraPDF.exe"]
   },
-  "plugins": {
-    "updater": {
-      "active": true,
-      "endpoints": [
-        "https://github.com/devozilla/tauri/releases/latest/download/latest.json"
-      ],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDUxRTVDQzE0NjA2NTBGMjgKUldRb0QyVmdGTXpsVVZNMUowRXpYYXZ1TlJTZ3dZTm9IYllOOENKdmg3cHd2NkROTVZkK3pmeGQK"
-    }
-  }
+  "plugins": {}
 }

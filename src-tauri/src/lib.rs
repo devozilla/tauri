@@ -1,48 +1,73 @@
-use tauri::Emitter;
+use tauri::Manager;
+use std::process::Command;
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
+use std::time::Instant;
 
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
+// Custom silent printer discovery for Windows
+#[tauri::command]
+fn get_printers_silent() -> String {
+    #[cfg(target_os = "windows")]
+    {
+        const CREATE_NO_WINDOW: u32 = 0x08000000;
+        let mut command = Command::new("powershell");
+        command.args(&["-Command", "Get-Printer | Select-Object Name | ConvertTo-Json"]);
+        command.creation_flags(CREATE_NO_WINDOW);
+        
+        match command.output() {
+            Ok(output) => String::from_utf8_lossy(&output.stdout).to_string(),
+            Err(e) => format!("Error: {}", e),
+        }
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        "[]".to_string()
+    }
+}
+
+// High-performance asynchronous PDF printing using Microsoft Edge engine (built-in to Windows)
+#[tauri::command]
+fn print_pdf_silent(path: String, printer: String) -> String {
+    #[cfg(target_os = "windows")]
+    {
+        std::thread::spawn(move || {
+            const CREATE_NO_WINDOW: u32 = 0x08000000;
+            let mut command = Command::new("powershell");
+            
+            // This script uses the built-in Chromium engine in Edge to print PDFs directly
+            // It is much faster and more reliable than the standard shell 'Print' verb
+            let script = if printer.is_empty() {
+                format!(
+                    "Start-Process 'msedge.exe' -ArgumentList '--headless', '--print-to-printer', '\"{0}\"' -WindowStyle Hidden",
+                    path
+                )
+            } else {
+                format!(
+                    "Start-Process 'msedge.exe' -ArgumentList '--headless', '--print-to-printer', '--printer-name=\"{1}\"', '\"{0}\"' -WindowStyle Hidden",
+                    path, printer
+                )
+            };
+            
+            command.args(&["-Command", &script]);
+            command.creation_flags(CREATE_NO_WINDOW);
+            let _ = command.output();
+        });
+        "Sent to spooler".to_string()
+    }
+    #[cfg(not(target_os = "windows"))]
+    { "Not implemented for this OS".to_string() }
+}
+
 #[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
-#[tauri::command]
-async fn check_for_updates(app: tauri::AppHandle) -> Result<(), String> {
-    use tauri_plugin_updater::UpdaterExt;
-
-    let updater = app.updater().map_err(|e: tauri_plugin_updater::Error| e.to_string())?;
-    match updater.check().await {
-        Ok(Some(update)) => {
-            // Notify frontend that an update is available
-            let version = update.version.clone();
-            let body = update.body.clone();
-            app.emit("update-available", serde_json::json!({
-                "version": version,
-                "body": body,
-            }))
-            .map_err(|e| e.to_string())?;
-
-            // Download and install the update
-            update
-                .download_and_install(|_chunk, _total| {}, || {})
-                .await
-                .map_err(|e| e.to_string())?;
-
-            // Restart the app after installation
-            app.restart();
-        }
-        Ok(None) => {
-            let _ = app.emit("update-not-available", ());
-        }
-        Err(e) => {
-            return Err(e.to_string());
-        }
-    }
-    Ok(())
-}
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    let start_time = Instant::now();
+    println!("[Backend] Starting Tauri Application...");
+
     tauri::Builder::default()
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_opener::init())
@@ -50,49 +75,11 @@ pub fn run() {
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_printer_v2::init())
         .plugin(tauri_plugin_store::Builder::default().build())
-        .plugin(
-            tauri_plugin_updater::Builder::new()
-                .header(
-                    "Authorization",
-                    format!("token {}", "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"),
-                )
-                .expect("failed to add authorization header")
-                .build(),
-        )
-        .setup(|app| {
-            use tauri::menu::{Menu, MenuItem};
-            use tauri::tray::TrayIconBuilder;
-
-            let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
-            let settings_i = MenuItem::with_id(app, "settings", "API Settings", true, None::<&str>)?;
-            let menu = Menu::with_items(app, &[&settings_i, &quit_i])?;
-
-            let _tray = TrayIconBuilder::new()
-                .icon(app.default_window_icon().unwrap().clone())
-                .menu(&menu)
-                .on_menu_event(|app: &tauri::AppHandle, event| match event.id.as_ref() {
-                    "quit" => {
-                        app.exit(0);
-                    }
-                    "settings" => {
-                        let _ = tauri::WebviewWindowBuilder::new(
-                            app,
-                            "api_settings",
-                            tauri::WebviewUrl::App("/api-settings".into()),
-                        )
-                        .title("API Configuration")
-                        .inner_size(400.0, 400.0)
-                        .resizable(true)
-                        .always_on_top(true)
-                        .build();
-                    }
-                    _ => {}
-                })
-                .build(app)?;
-
+        .invoke_handler(tauri::generate_handler![greet, get_printers_silent, print_pdf_silent])
+        .setup(move |_app| {
+            println!("[Backend] App setup took: {:?}ms", start_time.elapsed().as_millis());
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![greet, check_for_updates])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

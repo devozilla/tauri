@@ -16,6 +16,7 @@
     "core:window:allow-close",
     "dialog:default",
     "printer:default",
+    "printer:allow-print-html",
     "fs:default",
     "fs:allow-temp-write",
     "fs:allow-temp-write-recursive",
@@ -28,6 +29,8 @@
     "store:default",
     "process:default",
     "core:tray:default",
-    "core:menu:default"
+    "core:menu:default",
+    "shell:allow-execute",
+    "shell:allow-spawn"
   ]
 }
