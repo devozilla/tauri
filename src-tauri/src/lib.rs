@@ -1,8 +1,11 @@
-use tauri::Manager;
+use tauri::{WebviewUrl, WebviewWindowBuilder};
 use std::process::Command;
 #[cfg(target_os = "windows")]
 use std::os::windows::process::CommandExt;
-use std::time::Instant;
+
+
+
+
 
 // Custom silent printer discovery for Windows
 #[tauri::command]
@@ -63,9 +66,10 @@ fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let start_time = Instant::now();
+
     println!("[Backend] Starting Tauri Application...");
 
     tauri::Builder::default()
@@ -76,8 +80,14 @@ pub fn run() {
         .plugin(tauri_plugin_printer_v2::init())
         .plugin(tauri_plugin_store::Builder::default().build())
         .invoke_handler(tauri::generate_handler![greet, get_printers_silent, print_pdf_silent])
-        .setup(move |_app| {
-            println!("[Backend] App setup took: {:?}ms", start_time.elapsed().as_millis());
+        .setup(|app| {
+            WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
+                .additional_browser_args("--lang=en-GB --accept-lang=en-GB")
+                .title("Track One Plus")
+                .decorations(false)
+                .maximized(true)
+                .min_inner_size(1036.0, 500.0)
+                .build()?;
             Ok(())
         })
         .run(tauri::generate_context!())

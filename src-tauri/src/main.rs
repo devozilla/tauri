@@ -6,6 +6,56 @@ use std::time::SystemTime;
 use base64::{Engine as _, engine::general_purpose};
 use tauri::Manager;
 
+// ✅ الـ imports الصح من المصادر الصح
+use tauri::Runtime;
+use tauri_plugin_powersync::PowerSyncExt;
+use powersync::{
+    BackendConnector,
+    SyncOptions,
+    PowerSyncCredentials,
+    error::PowerSyncError,
+};
+use async_trait::async_trait;
+
+// ════════════════════════════════════════════
+//  Connector — read-only
+// ════════════════════════════════════════════
+struct MyConnector {
+    endpoint: String,
+    token: String,
+}
+
+#[async_trait]
+impl BackendConnector for MyConnector {
+    async fn fetch_credentials(&self) -> Result<PowerSyncCredentials, PowerSyncError> {
+        Ok(PowerSyncCredentials {
+            endpoint: self.endpoint.clone(),
+            token: self.token.clone(),
+        })
+    }
+
+    async fn upload_data(&self) -> Result<(), PowerSyncError> {
+        Ok(()) // read-only
+    }
+}
+
+// ════════════════════════════════════════════
+//  Tauri Command
+// ════════════════════════════════════════════
+#[tauri::command]
+async fn connect<R: Runtime>(
+    app: tauri::AppHandle<R>,
+    handle: usize,
+    endpoint: String,
+    token: String,
+) -> tauri_plugin_powersync::Result<()> {
+    let ps = app.powersync();
+    let database = ps.database_from_javascript_handle(handle)?;
+    let options = SyncOptions::new(MyConnector { endpoint, token });
+    database.connect(options).await;
+    Ok(())
+}
+
 #[tauri::command]
 fn print_pdf(app: tauri::AppHandle, pdf_base64: String, printer_name: String, orientation: String) {
     // 1. Decode and write PDF to temp
@@ -72,7 +122,10 @@ fn get_printers_silent() -> String {
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![print_pdf, get_printers_silent])
+        .invoke_handler(tauri::generate_handler![print_pdf, get_printers_silent, connect])
+        .plugin(tauri_plugin_powersync::init())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_fs::init())
         .run(tauri::generate_context!())
         .expect("error while running tauri app");
 }
