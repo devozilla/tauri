@@ -7,8 +7,8 @@
   ],
   "remote": {
     "urls": [
-      "https://newtopfront.netlify.app",
-      "https://newtopfront.netlify.app/*"
+      "https://top-dev.duckdns.org",
+      "https://top-dev.duckdns.org/*"
     ]
   },
   "permissions": [

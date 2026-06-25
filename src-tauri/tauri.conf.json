@@ -1,17 +1,17 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "top",
-  "version": "1.0.1",
-  "identifier": "com.muhammad.top",
+  "productName": "TOP DEV",
+  "version": "1.0.0",
+  "identifier": "com.top.erpdev",
   "build": {
     "devUrl": "http://localhost:5173/",
-    "frontendDist": "https://newtopfront.netlify.app/"
+    "frontendDist": "https://www.top-dev.duckdns.org/"
   },
   "app": {
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "Track One Plus",
+        "title": "TOP DEV",
         "decorations": false,
         "width": 1200,
         "height": 600,
